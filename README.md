@@ -30,7 +30,7 @@ sysctl -w vm.max_map_count=262144
 
 ## Machine Learning
 
-- Instrucciones para la demo en el siguiente [documento](./doc/pdf/machine-learning-demos.pdf). 
+- Instrucciones para la demo en el siguiente [documento](./doc/pdf/Machine-Learning-Elasticsearch-demos.pdf). 
 
 ## Finalizar
 

@@ -1,0 +1,75 @@
+version: '2.1'
+
+services:
+
+  # Elasticsearch container: 1-node cluster at http://elasticsearch:9200
+  elasticsearch:
+    container_name: elasticsearch
+    hostname: elasticsearch
+    image: "docker.elastic.co/elasticsearch/elasticsearch:${ELK_VERSION}"
+    volumes:
+      - 'es_data:/usr/share/elasticsearch/data'
+      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - http.host=0.0.0.0
+      - transport.host=127.0.0.1
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms${ES_JVM_HEAP} -Xmx${ES_JVM_HEAP}"
+      - ELASTIC_PASSWORD=${ES_PASSWORD}
+    mem_limit: ${ES_MEM_LIMIT}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test: ["CMD", "curl","-s" ,"-f", "-u", "elastic:${ES_PASSWORD}", "http://localhost:9200/_cat/health"]
+    networks:
+      - elk
+
+  # Filebeat container
+  # filebeat:
+  #   container_name: filebeat
+  #   hostname: filebeat
+  #   image: "docker.elastic.co/beats/filebeat:${ELK_VERSION}"
+  #   volumes:
+  #     # Mount filebeat configuration
+  #     - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+  #     # Mount file directory into container /var/log
+  #     - ./doc/dataset/:/var/log/
+  #     # Mount data registry in host
+  #     - filebeatdata:/usr/share/filebeat/data/
+  #   networks:
+  #     - elk
+  #   restart: on-failure
+  #   depends_on:
+  #     elasticsearch: { condition: service_healthy }  
+
+  # Kibana container
+  kibana:
+    container_name: kibana
+    hostname: kibana
+    image: "docker.elastic.co/kibana/kibana:${ELK_VERSION}"
+    volumes:
+      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+    ports:
+      - "5601:5601"
+    networks:
+      - elk
+    depends_on:
+      elasticsearch: { condition: service_healthy }
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-s", "-f", "-u", "elastic:${ES_PASSWORD}", "http://localhost:5601/api/status"]
+      retries: 6
+
+networks: 
+  elk:
+
+volumes:
+  es_data:
+    driver: local
+  filebeatdata:
+    driver: local

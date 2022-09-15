@@ -1,4 +1,4 @@
-# Elastic & CIU
+# Elastic & VIU
 
 Demos para la sesión del Stack Elastic y Machine Learning para la Universidad Internacional de Valencia (VIU), Master en [Big Data y Data Science](https://www.universidadviu.es/master-universitario-big-data-data-science/).
 
